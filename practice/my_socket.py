@@ -30,25 +30,32 @@ class SocketServer:
         try:
             with open(file_path, 'wb') as file:
                 file.write(data)
-            print(f"Request data saved to {file_path}")
         except Exception as e:
-            print(f"Error saving request data: {e}")
+            print(f"Error: {e}")
 
     def saveImageData(self, data):
         """멀티파트로 전송받은 이미지 데이터를 파일로 저장"""
-        boundary = b"\r\n\r\n"
-        parts = data.split(boundary, 1)
-        if len(parts) > 1:
-            image_data = parts[1].strip()
-            image_path = os.path.join(self.DIR_PATH, "received_image.jpg")
-            try:
-                with open(image_path, 'wb') as img_file:
-                    img_file.write(image_data)
-                print(f"Image data saved to {image_path}")
-            except Exception as e:
-                print(f"Error saving image data: {e}")
-        else:
-            print("No image data found in the request.")
+        # 멀티파트 데이터에서 boundary 추출
+        try:
+            content_type_header = data.split(b"\r\n\r\n")[0]
+            boundary = content_type_header.split(b"boundary=")[-1].strip()
+
+            if not boundary:
+                print("Boundary not found in the request.")
+                return
+
+            parts = data.split(b"--" + boundary)
+            for part in parts:
+                if b"Content-Type: image/" in part:
+                    header_end = part.find(b"\r\n\r\n")
+                    image_data = part[header_end+4:].strip()
+
+                    image_path = os.path.join(self.DIR_PATH, "received_image.jpg")
+                    with open(image_path, 'wb') as img_file:
+                        img_file.write(image_data)
+                    return
+        except Exception as e:
+            print(f"Error: {e}")
 
     def run(self, ip, port):
         """서버 실행"""
@@ -62,7 +69,7 @@ class SocketServer:
         try:
             while True:
                 clnt_sock, req_addr = self.sock.accept()
-                clnt_sock.settimeout(10.0)
+                clnt_sock.settimeout(20.0)  # 타임아웃 시간을 20초로 설정
                 print(f"Request from {req_addr}")
 
                 # 데이터 수신
@@ -76,9 +83,7 @@ class SocketServer:
                 except socket.timeout:
                     print("Socket timed out while receiving data.")
 
-                # 요청 데이터를 파일로 저장
                 self.saveRequestData(request_data)
-                # 이미지 데이터가 있는 경우 저장
                 self.saveImageData(request_data)
 
                 # 응답 전송
