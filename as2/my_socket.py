@@ -30,30 +30,7 @@ class SocketServer:
         try:
             with open(file_path, 'wb') as file:
                 file.write(data)
-        except Exception as e:
-            print(f"Error: {e}")
-
-    def saveImageData(self, data):
-        """멀티파트로 전송받은 이미지 데이터를 파일로 저장"""
-        # 멀티파트 데이터에서 boundary 추출
-        try:
-            content_type_header = data.split(b"\r\n\r\n")[0]
-            boundary = content_type_header.split(b"boundary=")[-1].strip()
-
-            if not boundary:
-                print("Boundary not found in the request.")
-                return
-
-            parts = data.split(b"--" + boundary)
-            for part in parts:
-                if b"Content-Type: image/" in part:
-                    header_end = part.find(b"\r\n\r\n")
-                    image_data = part[header_end+4:].strip()
-
-                    image_path = os.path.join(self.DIR_PATH, "received_image.jpg")
-                    with open(image_path, 'wb') as img_file:
-                        img_file.write(image_data)
-                    return
+            print(f"Request data saved to {file_path}")
         except Exception as e:
             print(f"Error: {e}")
 
@@ -83,13 +60,17 @@ class SocketServer:
                 except socket.timeout:
                     print("Socket timed out while receiving data.")
 
+                # 요청 데이터 저장
                 self.saveRequestData(request_data)
-                self.saveImageData(request_data)
 
                 # 응답 전송
                 clnt_sock.sendall(self.RESPONSE)
                 print("Response sent to client.")
-
+                
+                # 요청 데이터 출력
+                print("Request received:")
+                print(request_data.decode('utf-8', errors='ignore'))  # 요청 내용을 터미널에 출력
+                
                 # 클라이언트 소켓 닫기
                 clnt_sock.close()
         except KeyboardInterrupt:
