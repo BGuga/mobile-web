@@ -50,11 +50,28 @@
         android:layout_marginBottom="16dp"
         android:scrollbars="vertical" />
 
-    <!-- 강아지 모음별 화면 보기 버튼 -->
-    <Button
-        android:id="@+id/btn_view_dogs"
+    <!-- 강아지 모음별 화면 보기와 상태 확인 버튼 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onClickViewDogs"
-        android:text="강아지 모음별 화면 보기" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/btnCheckStatus"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:onClick="onClickCheckStatus"
+            android:text="강아지 상태 확인" />
+
+        <Button
+            android:id="@+id/btn_view_dogs"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:onClick="onClickViewDogs"
+            android:text="강아지 모음별 화면 보기" />
+    </LinearLayout>
 </LinearLayout>

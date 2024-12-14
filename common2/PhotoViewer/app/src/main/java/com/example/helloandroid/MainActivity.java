@@ -73,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Download", Toast.LENGTH_LONG).show();
     }
 
+    public void onClickCheckStatus(View v) {
+        new CheckStatusTask().execute(site_url + "/api_root/status/");
+    }
+
     public void onClickViewDogs(View v) {
         // 옵션 배열 정의
         final String[] options = {"노는 사진", "자는 사진", "먹는 사진"};
@@ -253,6 +257,61 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
         }
     }
+
+    private class CheckStatusTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            String apiUrl = urls[0];
+            String token = "4bdce80c35b857798f5e37222181105c9e016bd9";
+            try {
+                // API 호출
+                URL url = new URL(apiUrl);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("Authorization", "Token " + token);
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // 응답 읽기
+                    InputStream is = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+                    is.close();
+
+                    // JSON 파싱
+                    JSONObject responseJson = new JSONObject(result.toString());
+                    return responseJson.getString("text");
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String text) {
+            if (text != null) {
+                if (text.contains("Eating")) {
+                    Toast.makeText(MainActivity.this, "강아지가 식사 중입니다.", Toast.LENGTH_SHORT).show();
+                } else if (text.contains("Sleeping")) {
+                    Toast.makeText(MainActivity.this, "강아지가 수면 중입니다.", Toast.LENGTH_SHORT).show();
+                } else if (text.contains("Playing")) {
+                    Toast.makeText(MainActivity.this, "강아지가 놀고 있습니다.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "강아지 상태를 알 수 없습니다.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(MainActivity.this, "API 요청에 실패했습니다.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
 }
 

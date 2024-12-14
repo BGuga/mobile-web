@@ -15,5 +15,6 @@ urlpatterns = [
     path('post/<int:pk>/edit/', views.post_edit, name='post_edit'),
     path('api_root/', include(router.urls)),
     path('api_root/search/<str:currentStatus>/', views.FilteredPostsView.as_view()),
+    path('api_root/status/', views.RecentPostView.as_view()), 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

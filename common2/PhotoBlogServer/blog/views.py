@@ -59,3 +59,13 @@ class FilteredPostsView(APIView):
         queryset = Post.objects.filter(text__icontains=currentStatus)
         serializer = PostSerializer(queryset, many=True)
         return Response(serializer.data)
+
+class RecentPostView(APIView):
+    def get(self, request):
+        # 가장 최근의 글 하나 가져오기
+        recent_post = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date').first()
+        if recent_post:
+            serializer = PostSerializer(recent_post)
+            return Response(serializer.data, status=200)
+        else:
+            return Response({"detail": "No posts found."}, status=404)
