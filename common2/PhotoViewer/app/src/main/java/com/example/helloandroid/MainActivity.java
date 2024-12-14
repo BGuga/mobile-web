@@ -35,13 +35,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_PICK = 1;
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
     ImageView imgView;
     TextView textView;
-    String site_url = "https://tmdwns9912.pythonanywhere.com/";
-//    String site_url = "http://127.0.0.1:8000";
+//    String site_url = "https://tmdwns9912.pythonanywhere.com/";
+    String site_url = "http://10.0.2.2:8000";
     JSONObject post_json;
     String imageUrl = null;
     Bitmap bmImg = null;
@@ -69,6 +71,26 @@ public class MainActivity extends AppCompatActivity {
         taskDownload = new CloadImage();
         taskDownload.execute(site_url + "/api_root/post/");
         Toast.makeText(getApplicationContext(), "Download", Toast.LENGTH_LONG).show();
+    }
+
+    public void onClickViewDogs(View v) {
+        // 옵션 배열 정의
+        final String[] options = {"노는 사진", "자는 사진", "먹는 사진"};
+        final String[] urls = {site_url + "/api_root/search/Playing", site_url + "/api_root/search/Sleeping", site_url + "/api_root/search/Eating"};
+
+        // MaterialAlertDialogBuilder로 다이얼로그 생성
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        builder.setTitle("강아지 사진 보기");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 선택된 옵션에 따라 API 요청 실행
+                String selectedUrl = urls[which];
+                new CloadImage().execute(selectedUrl);
+                Toast.makeText(MainActivity.this, options[which] + " 불러오는 중...", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.show();
     }
 
     public void onClickUpload(View v) {
@@ -160,6 +182,9 @@ public class MainActivity extends AppCompatActivity {
                         post_json = (JSONObject) aryJson.get(i);
                         imageUrl = post_json.getString("image");
                         if (!imageUrl.equals("")) {
+                            if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+                                imageUrl = site_url + imageUrl; // 서버 주소와 결합
+                            }
                             URL myImageUrl = new URL(imageUrl);
                             conn = (HttpURLConnection) myImageUrl.openConnection();
                             InputStream imgStream = conn.getInputStream();

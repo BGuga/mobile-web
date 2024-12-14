@@ -2,9 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from .models import Post
 from .forms import PostForm
+from rest_framework.response import Response
 from django.shortcuts import redirect
 from rest_framework import viewsets
-from .serializers import PostSerializer
+from .serializers import PostSerializer, JsonSerializer
+from rest_framework.views import APIView
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
@@ -44,3 +46,16 @@ def post_edit(request, pk):
 class blogImage(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+
+class BlogImageViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = JsonSerializer
+
+
+class FilteredPostsView(APIView):
+    def get(self, request, currentStatus):
+        print("called")  
+        queryset = Post.objects.filter(text__icontains=currentStatus)
+        serializer = PostSerializer(queryset, many=True)
+        return Response(serializer.data)

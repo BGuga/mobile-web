@@ -8,3 +8,11 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Post
         fields = ('author', 'title', 'text', 'created_date', 'published_date', 'image')
+
+
+class JsonSerializer(serializers.ModelSerializer):
+    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    
+    class Meta:
+        model = Post
+        fields = ['author', 'title', 'text', 'created_date', 'published_date', 'image']
