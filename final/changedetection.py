@@ -7,13 +7,13 @@ from decideDogAction import DecideDogAction
 
 class ChangeDetection:
     result_prev = []
-    HOST = 'http://127.0.0.1:8000/'
+    HOST = 'https://tmdwns9912.pythonanywhere.com/'
     username = 'admin'
     password = 'east2424'
-    token = "4bdce80c35b857798f5e37222181105c9e016bd9"
-    title = "title"
-    text = "text"
-    current_dog_status = "None"
+    token = ""
+    title = ""
+    text = ""
+    current_dog_status = ""
 
     def __init__(self, names):
         self.result_prev = [0 for i in range(len(names))]
