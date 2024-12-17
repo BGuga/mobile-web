@@ -1,0 +1,2 @@
+sourceUrl : https://github.com/BGuga/mobile-web/tree/master/final
+serviceUrl : https://tmdwns9912.pythonanywhere.com/
